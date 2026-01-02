@@ -79,7 +79,7 @@ def _(a, mask):
 @app.cell
 def _(np):
     c = np.array([1,2,3,4,2,3,1,4,5,6,71,4,21,4,5])
-    np.unique(c)
+    np.unique(c).shape
     return
 
 
