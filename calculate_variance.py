@@ -9,7 +9,7 @@ def calculate_variance(y:np.array) -> np.float16:
         y: np.array()
             y.shape = (y_dim, )
     Return:
-        variance: np.float32
+        variance: np.float16
 
     """
     variance = np.mean(

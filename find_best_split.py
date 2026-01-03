@@ -11,6 +11,9 @@ def find_best_split(X, y):
             val: 最小の分散
             feat: 最小の分散をつくるための特徴インデックス
             thr: 最小の分散をつくるための閾値
+    すべてのXの列(feat)に対し、X[:, feat]のユニークな値を全部探索し、分割の分散を最も小さくする分け方を探索する。
+
+    feat, thrの分け方を工夫することで、XGBoost, LightGBMと進化していく。
     """
     n_samples, n_feats = X.shape
     
