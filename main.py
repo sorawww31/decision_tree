@@ -15,9 +15,10 @@ def parsers():
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--mode", "-m", type=str, default="decision_tree")
     parser.add_argument("--max_depth", "-d", type=int, default=3)
-    parser.add_argument("--min_samples_split", "--s", type=int, default=10)
+    parser.add_argument("--min_samples_split", "--s", type=int, default=2)
     parser.add_argument("--val_split", type=float, default=0.8)
     parser.add_argument("--objective", "-o", type=str, default="RSME")
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     return args
 
@@ -50,7 +51,9 @@ def main():
     print(f"Use {args.mode.upper()} algorithm ")
     if args.mode.lower() == "decision_tree":
         model = SimpleDecisionTree(
-            max_depth=args.max_depth, min_samples_split=args.min_samples_split
+            max_depth=args.max_depth,
+            min_samples_split=args.min_samples_split,
+            seed=args.seed,
         )
         # sklearn DecisionTreeRegressor comparison
         sklearn_model = DecisionTreeRegressor(

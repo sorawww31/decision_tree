@@ -15,7 +15,7 @@ class SimpleDecisionTree:
         最終的なスコアを表すノード。分類タスクなら各クラスの確率が出るし、回帰なら予測値を表す
     """
 
-    def __init__(self, max_depth: int = 3, min_samples_split: int = 2):
+    def __init__(self, max_depth: int = 3, min_samples_split: int = 2, seed: int = 42):
         """
         Args:
             max_depth:
@@ -26,6 +26,7 @@ class SimpleDecisionTree:
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.tree: dict | np.float16 | None = None
+        self.seed: int = seed
 
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series):
         X = np.array(X)
@@ -61,7 +62,7 @@ class SimpleDecisionTree:
             # 例えばRossがMAEならmedianだし、今回はMSEなのでmean。もちろん他にもあるよ
             return np.float16(np.mean(y))
 
-        best_split = find_best_split(X, y)
+        best_split = find_best_split(X, y, self.seed)
         (X_left, y_left), (X_right, y_right) = split_data(
             X, y, best_split["feat"], best_split["thr"]
         )

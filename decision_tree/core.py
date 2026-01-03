@@ -1,3 +1,4 @@
+import random
 from typing import Tuple
 
 import numpy as np
@@ -22,7 +23,7 @@ def calculate_cost(y_left: np.ndarray, y_right: np.ndarray) -> np.float16:
     return (val_left * N_left + val_right * N_right) / (N_left + N_right)
 
 
-def find_best_split(X, y):
+def find_best_split(X, y, seed=42):
     """
     Args:
         X: 特徴行列 (データ数, 特徴の数)
@@ -39,7 +40,7 @@ def find_best_split(X, y):
     n_samples, n_feats = X.shape
 
     best_split = {"val": float("inf"), "feat": None, "thr": None}
-
+    bests = []
     for feat in range(n_feats):
         # np.unique() を使用
         thresholds = np.unique(X[:, feat])
@@ -54,12 +55,14 @@ def find_best_split(X, y):
 
             val = calculate_cost(y_left, y_right)
 
-            if val < best_split["val"]:
+            if val <= best_split["val"]:
                 best_split["val"] = val
                 best_split["feat"] = feat
                 best_split["thr"] = thr
-
-    return best_split
+                bests.append(best_split)
+    if seed is not None:
+        random.seed(seed)
+    return random.choice(bests)
 
 
 def calculate_variance(y: np.ndarray) -> np.float16:

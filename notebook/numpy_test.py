@@ -104,5 +104,13 @@ def _(df, np):
     return
 
 
+@app.cell
+def _():
+    import random
+    x = [1,2,3,4,5]
+    random.choices(x, )
+    return
+
+
 if __name__ == "__main__":
     app.run()
