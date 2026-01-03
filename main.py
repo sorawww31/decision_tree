@@ -4,6 +4,7 @@ from typing import Tuple
 import numpy as np
 import pandas as pd
 from sklearn.datasets import load_diabetes
+from sklearn.tree import DecisionTreeRegressor
 
 from decision_tree.tree import SimpleDecisionTree
 from utils import object
@@ -12,7 +13,7 @@ from utils import object
 def parsers():
     parser = argparse.ArgumentParser()
     parser.add_argument("--debug", action="store_true")
-    parser.add_argument("--mode", "-m", type=str, default="simple")
+    parser.add_argument("--mode", "-m", type=str, default="decision_tree")
     parser.add_argument("--max_depth", "-d", type=int, default=3)
     parser.add_argument("--min_samples_split", "--s", type=int, default=10)
     parser.add_argument("--val_split", type=float, default=0.8)
@@ -47,8 +48,12 @@ def main():
     tr_df, val_df = _load_datasets(val_split=args.val_split, debug=args.debug)
 
     print(f"Use {args.mode.upper()} algorithm ")
-    if args.mode.lower() == "simple":
+    if args.mode.lower() == "decision_tree":
         model = SimpleDecisionTree(
+            max_depth=args.max_depth, min_samples_split=args.min_samples_split
+        )
+        # sklearn DecisionTreeRegressor comparison
+        sklearn_model = DecisionTreeRegressor(
             max_depth=args.max_depth, min_samples_split=args.min_samples_split
         )
     else:
@@ -56,25 +61,50 @@ def main():
 
     X_tr, y_tr = tr_df.drop(columns=["target"]), tr_df["target"]
     X_val, y_val = val_df.drop(columns=["target"]), val_df["target"]
+
+    # 推論
     model.fit(X_tr, y_tr)
     y_pred = model.predict(X_val)
     y_pred_train = model.predict(X_tr)
     means = np.array([np.mean(y_val)] * (len(y_val)))
+
+    sklearn_model.fit(X_tr, y_tr)
+    sklearn_pred = sklearn_model.predict(X_val)
+    sklearn_pred_train = sklearn_model.predict(X_tr)
+
     if args.objective.lower() == "rsme":
         print("===RSME===")
         score = object.root_mean_sqrt_error(y=y_val, y_pred=y_pred)
         train_score = object.root_mean_sqrt_error(y=y_tr, y_pred=y_pred_train)
         baseline = object.root_mean_sqrt_error(y=y_val, y_pred=means)
+
+        sklearn_score = object.root_mean_sqrt_error(y=y_val, y_pred=sklearn_pred)
+        sklearn_train_score = object.root_mean_sqrt_error(
+            y=y_tr, y_pred=sklearn_pred_train
+        )
+        sklearn_baseline = object.root_mean_sqrt_error(y=y_val, y_pred=means)
+
     elif args.objective.lower() == "rsmle":
         print("===RSMLE===")
         score = object.root_mean_sqrt_log_error(y=y_val, y_pred=y_pred)
         train_score = object.root_mean_sqrt_log_error(y=y_tr, y_pred=y_pred_train)
         baseline = object.root_mean_sqrt_log_error(y=y_val, y_pred=means)
+
+        sklearn_score = object.root_mean_sqrt_log_error(y=y_val, y_pred=sklearn_pred)
+        sklearn_train_score = object.root_mean_sqrt_log_error(
+            y=y_tr, y_pred=sklearn_pred_train
+        )
+        sklearn_baseline = object.root_mean_sqrt_log_error(y=y_val, y_pred=means)
+
     else:
         raise ValueError(f"{args.objective}は対応していません")
 
-    print(f"score: {score}")
-    print(f"train_score {train_score}, means_score {baseline}")
+    print(f"[Simple] score: {score}")
+    print(f"[Simple] train_score: {train_score}, means_score: {baseline}")
+    print(f"[sklearn] score: {sklearn_score}")
+    print(
+        f"[sklearn] train_score: {sklearn_train_score}, means_score: {sklearn_baseline}"
+    )
 
 
 if __name__ == "__main__":
