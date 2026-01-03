@@ -9,4 +9,6 @@ dependencies = [
     "numpy>=2.4.0",
     "pandas>=2.3.3",
     "pyzmq>=27.1.0",
+    "scikit-learn>=1.8.0",
+    "seaborn>=0.13.2",
 ]

@@ -41,7 +41,7 @@ def find_best_split(X, y):
     best_split = {"val": float("inf"), "feat": None, "thr": None}
 
     for feat in range(n_feats):
-        # 修正1: np.unique() を使用
+        # np.unique() を使用
         thresholds = np.unique(X[:, feat])
 
         for thr in thresholds:

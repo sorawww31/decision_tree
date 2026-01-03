@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from .core import find_best_split, split_data
 
@@ -26,10 +27,13 @@ class SimpleDecisionTree:
         self.min_samples_split = min_samples_split
         self.tree: dict | np.float16 | None = None
 
-    def fit(self, X: np.ndarray, y: np.ndarray):
+    def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series):
+        X = np.array(X)
+        y = np.array(y)
         self.tree = self._grow_tree(X, y, depth=0)
 
-    def predict(self, X: np.ndarray):
+    def predict(self, X: np.ndarray | pd.DataFrame):
+        X = np.array(X)
         return np.array([self._predict_tree(x, self.tree) for x in X])
 
     def _grow_tree(

@@ -7,14 +7,13 @@ app = marimo.App()
 @app.cell
 def _():
     import numpy as np
-    from typing import Tuple
     return (np,)
 
 
 @app.cell
 def _(np):
-    y = np.array([1, 2, 3,4,5])
-    np.mean((y-y.mean())**2)
+    y = np.array([1, 2, 3, 4, 5])
+    np.mean((y - y.mean()) ** 2)
     return (y,)
 
 
@@ -26,21 +25,18 @@ def _(y):
 
 @app.cell
 def _(y):
-    (y.std())**2
+    (y.std()) ** 2
     return
 
 
 @app.cell
 def _(np, y):
-    def calculate_variance(y:np.array) -> np.float32:
+    def calculate_variance(y: np.array) -> np.float32:
         y_mean = y.mean()
         variation = y - y_mean
-        variance = np.mean(
-            np.mean(
-                variation**2
-            )
-        )
+        variance = np.mean(np.mean(variation**2))
         return variance
+
     calculate_variance(y)
     return
 
@@ -53,8 +49,11 @@ def _(y):
 
 @app.cell
 def _(np, y):
-    def split_data(X: np.array, y) -> tuple[tuple[np.array, np.float16], tuple[np.array, np.float16]]:
+    def split_data(
+        X: np.array, y
+    ) -> tuple[tuple[np.array, np.float16], tuple[np.array, np.float16]]:
         return (X, y), (X, y)
+
     split_data(y, 2)
     return
 
@@ -66,7 +65,7 @@ def _(np):
     print(a)
     print(b)
 
-    mask = a[:, 2]  <= 2
+    mask = a[:, 2] <= 2
     return a, mask
 
 
@@ -78,8 +77,30 @@ def _(a, mask):
 
 @app.cell
 def _(np):
-    c = np.array([1,2,3,4,2,3,1,4,5,6,71,4,21,4,5])
+    c = np.array([1, 2, 3, 4, 2, 3, 1, 4, 5, 6, 71, 4, 21, 4, 5])
     np.unique(c).shape
+    return
+
+
+@app.cell
+def _():
+    from sklearn.datasets import load_diabetes, fetch_california_housing
+
+    dataset = load_diabetes()
+    print(dataset.DESCR)
+    return (dataset,)
+
+
+@app.cell
+def _(dataset):
+    import pandas as pd
+    df = pd.DataFrame(dataset.data, columns=dataset.feature_names)
+    return (df,)
+
+
+@app.cell
+def _(df, np):
+    np.array(df.head())
     return
 
 

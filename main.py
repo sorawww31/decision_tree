@@ -1,5 +1,70 @@
+import argparse
+from typing import Tuple
+
+import pandas as pd
+from sklearn.datasets import load_diabetes
+
+from decision_tree.tree import SimpleDecisionTree
+from utils import object
+
+
+def parsers():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", "-d", action="store_true")
+    parser.add_argument("--mode", "-m", type=str, default="simple")
+    parser.add_argument("--max_depth", type=int, default=3)
+    parser.add_argument("--min_samples_split", "--s", type=int, default=10)
+    parser.add_argument("--val_split", type=float, default=0.8)
+    parser.add_argument("--objective", "-o", type=str, default="RSME")
+    args = parser.parse_args()
+    return args
+
+
+def _load_datasets(
+    val_split: float = 0.8, debug=False
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    sklearnのデータセットを読み込み、訓練データと検証データに分ける関数
+    Args:
+        val_split: trainとvalをどの割合で分けるか。0.8の場合、全体の80%がtrainとなり、20%がvalとなる
+    Returns:
+        tr_data, val_data: 分けられたtrainとval
+    """
+    dataset = load_diabetes()
+    data = pd.DataFrame(dataset.data, columns=dataset.feature_names)
+    target = pd.DataFrame(dataset.target, columns=["target"])
+    df = pd.concat([data, target], axis=1)
+    if debug:
+        df = df[:100]
+
+    train_size = int(len(df) * 0.8)
+    return df[:train_size], df[train_size:]
+
+
 def main():
-    print("Hello from decision-tree!")
+    args = parsers()
+    tr_df, val_df = _load_datasets(val_split=args.val_split, debug=args.debug)
+
+    if args.mode.lower() == "simple":
+        model = SimpleDecisionTree(
+            max_depth=args.max_depth, min_samples_split=args.min_samples_split
+        )
+    else:
+        raise ValueError(f"{args.mode}は対応しておりません")
+
+    X_tr, y_tr = tr_df.drop(columns=["target"]), tr_df["target"]
+    X_val, y_val = val_df.drop(columns=["target"]), val_df["target"]
+    model.fit(X_tr, y_tr)
+    y_pred = model.predict(X_val)
+
+    if args.objective.lower() == "rsme":
+        score = object.root_mean_sqrt_error(y=y_val, y_pred=y_pred)
+    elif args.objective.lower() == "rsmle":
+        score = object.root_mean_sqrt_log_error(y=y_val, y_pred=y_pred)
+    else:
+        raise ValueError(f"{args.objective}は対応していません")
+
+    print(f"学習完了 score: {score}")
 
 
 if __name__ == "__main__":
