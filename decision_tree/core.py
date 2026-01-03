@@ -1,7 +1,9 @@
+from typing import Tuple
+
 import numpy as np
 
 
-def calculate_cost(y_left: np.float16, y_right: np.float16) -> np.float16:
+def calculate_cost(y_left: np.ndarray, y_right: np.ndarray) -> np.float16:
     """
     左右の目的変数の分散の重み付き平均スコア
     データ数が多いということは、それだけ多くのデータポイントがその分散の影響を受けるということなので、重みを大きくして評価する必要があります。
@@ -18,11 +20,6 @@ def calculate_cost(y_left: np.float16, y_right: np.float16) -> np.float16:
     val_right, N_right = calculate_variance(y_right), len(y_right)
 
     return (val_left * N_left + val_right * N_right) / (N_left + N_right)
-
-
-import numpy as np
-
-from split_data import split_data
 
 
 def find_best_split(X, y):
@@ -49,7 +46,7 @@ def find_best_split(X, y):
 
         for thr in thresholds:
             # 前に作った関数を利用
-            X_left, y_left, X_right, y_right = split_data(X, y, feat, thr)
+            (X_left, y_left), (X_right, y_right) = split_data(X, y, feat, thr)
 
             # 片方が空っぽならスキップ（分割になっていないため）
             if len(y_left) == 0 or len(y_right) == 0:
@@ -65,10 +62,7 @@ def find_best_split(X, y):
     return best_split
 
 
-import numpy as np
-
-
-def calculate_variance(y: np.array) -> np.float16:
+def calculate_variance(y: np.ndarray) -> np.float16:
     """
     回帰木の各ノードの不純度に関わる分散を計算する
     np.var(y)で解決しますが。
@@ -84,12 +78,9 @@ def calculate_variance(y: np.array) -> np.float16:
     return variance
 
 
-import numpy as np
-
-
 def split_data(
-    X: np.array, y: np.array, feature_index: np.int8, threshold: np.float16
-) -> Tuple(Tuple(np.array, np.float16), Tuple(np.array, np.float16)):
+    X: np.ndarray, y: np.ndarray, feature_index: np.int8, threshold: np.float16
+) -> Tuple[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray]]:
     """
     行列Xのfeature_indexによる特定の列において、thresholdでXを左右に分けるコード
     Args:
