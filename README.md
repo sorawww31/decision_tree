@@ -1,12 +1,45 @@
+<!-- where: README.md / what: project overview and decision tree details / why: help readers understand the implementation -->
 # Numpyだけで機械学習
 機械学習アルゴリズムを理解するため、Geminiの**ガイド付き学習**を活用して簡単に実装し、理解する
 
 ## 決定木
 
-**プロジェクト概要**
+### プロジェクト概要
 PythonとNumPyのみを使用して、回帰タスク用の決定木（Regression Tree）をスクラッチで実装。Scikit-learnの実装と比較し、アルゴリズムの挙動と精度の検証を行った。
 
-**実装のポイント**
+### 実装の全体像（学習 → 予測）
+1. `SimpleDecisionTree.fit` で `X, y` を NumPy 配列に変換し、`_grow_tree` を呼び出す
+2. `_grow_tree` が分割点を探しながら再帰的に木を成長させる
+3. `predict` はサンプルごとに `_predict_tree` で木を下り、葉ノードの値を返す
+
+### 分割探索のロジック（core.py）
+**分割候補**
+* 各特徴量 `feat` について、`X[:, feat]` のユニーク値をしきい値候補として総当たりで評価
+* `split_data` は `X[:, feat] < threshold` を左、`>=` を右として分割
+
+**評価指標**
+* `calculate_variance` で左右それぞれの分散を算出
+* `calculate_cost` は左右の分散の**重み付き平均**（サンプル数で重み付け）
+* `find_best_split` が最小の分散となる `(feature_index, threshold)` を選択
+
+**同率最小の扱い**
+* `val <= best` のときに候補を `bests` に追加し、`seed` を設定したうえで `random.choice` で1つ選択
+
+### 停止条件と葉ノード
+* `depth >= max_depth` または `len(y) < min_samples_split` で分割を止める
+* 葉ノードの出力は `y` の平均値（回帰タスクの予測値）
+
+### 予測の流れ
+* 決定ノードでは `x[feature_index] < threshold` で左/右に分岐
+* 葉ノード（数値）に到達したらその値を返す
+
+### 主要クラスと関数
+* `decision_tree/tree.py`:
+  * `SimpleDecisionTree.fit` / `predict` / `_grow_tree` / `_predict_tree`
+* `decision_tree/core.py`:
+  * `find_best_split` / `split_data` / `calculate_cost` / `calculate_variance`
+
+### 実装のポイント
 
 * **再帰的構造:** 木の成長プロセス（`_grow_tree`）に再帰関数を使用。
 * **分割基準:** 回帰問題であるため、**分散（Variance）の減少**を最大化する分割点（特徴量と閾値）を採用。
