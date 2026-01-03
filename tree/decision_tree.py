@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import pandas as pd
 
@@ -20,6 +22,7 @@ class SimpleDecisionTree:
         max_depth: int = 3,
         min_samples_split: int = 2,
         min_samples_leaf: int = 5,
+        max_features: float = 0.8,
         seed: int = 42,
     ):
         """
@@ -33,7 +36,9 @@ class SimpleDecisionTree:
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
         self.tree: dict | np.float16 | None = None
+        self.max_features = max_features
         self.seed: int = seed
+        self.rng = random.Random(seed)
 
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series):
         X = np.array(X)
@@ -69,7 +74,7 @@ class SimpleDecisionTree:
             # 例えばRossがMAEならmedianだし、今回はMSEなのでmean。もちろん他にもあるよ
             return np.float16(np.mean(y))
 
-        best_split = find_best_split(X, y, self.seed)
+        best_split = find_best_split(X, y, self.rng, self.max_features)
         if not best_split:
             return np.float16(np.mean(y))
         (X_left, y_left), (X_right, y_right) = split_data(

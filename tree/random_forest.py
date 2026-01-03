@@ -7,7 +7,10 @@ from .decision_tree import SimpleDecisionTree
 class RandomForestRegressor:
     """
     RandomForestの凄いところ
-    1.
+    1.アンサンブル
+    2.データ、特徴の多様性
+    3.特徴の重要度を調べることができる
+
     """
 
     def __init__(
@@ -88,15 +91,8 @@ class RandomForestRegressor:
             # 復元抽出（シード付きrngで再現性を確保）
             idx_samples = rng.choice(np.array(range(n_samples)), size=self.max_samples)
             #
-            idx_feat = rng.choice(
-                np.array(range(n_feat)),
-                size=int(n_feat * self.max_features),
-                replace=False,
-            )
             # 各ツリーを各自訓練。
-            # X[idx_samples, idx_feat]とすると、(is[0], if[0]), (is[1], if[1]) ...と作られていくため、数が合わなくなる
-            self.trees[i].fit(X[idx_samples, :][:, idx_feat], y[idx_samples])
-            # self.idx_feat_list.append(idx_feat)
+            self.trees[i].fit(X[idx_samples, :], y[idx_samples])
 
     def predict(self, X: np.ndarray | pd.DataFrame):
         X = np.array(X)

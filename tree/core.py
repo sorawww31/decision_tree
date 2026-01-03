@@ -22,7 +22,7 @@ def calculate_cost(y_left: np.ndarray, y_right: np.ndarray) -> np.float16:
     return (val_left * N_left + val_right * N_right) / (N_left + N_right)
 
 
-def find_best_split(X, y, seed=42):
+def find_best_split(X, y, rng, max_features=0.8):
     """
     Args:
         X: 特徴行列 (データ数, 特徴の数)
@@ -36,14 +36,13 @@ def find_best_split(X, y, seed=42):
 
     feat, thrの分け方を工夫することで、XGBoost, LightGBMと進化していく。
     """
-    import random
 
     n_samples, n_feats = X.shape
 
     best_val = float("inf")
     bests = []  # 同率の最高スコアの分け方を格納するリスト
-
-    for feat in range(n_feats):
+    selected_feats = rng.sample(range(n_feats), k=int(n_feats * max_features))
+    for feat in selected_feats:
         # np.unique() を使用
         thresholds = np.unique(X[:, feat])
 
@@ -65,9 +64,8 @@ def find_best_split(X, y, seed=42):
                 # 同率の場合、リストに追加
                 bests.append({"val": val, "feat": feat, "thr": thr})
 
-    # 同率の候補からランダムに1つを選択
+    # 同率の候補からランダムに1つを選択（最初に作成したrngを再利用）
     if bests:
-        rng = random.Random(seed)
         return rng.choice(bests)
     else:
         # 分割が見つからなかった場合（通常は起こらない）
