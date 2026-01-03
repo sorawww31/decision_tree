@@ -15,7 +15,13 @@ class SimpleDecisionTree:
         最終的なスコアを表すノード。分類タスクなら各クラスの確率が出るし、回帰なら予測値を表す
     """
 
-    def __init__(self, max_depth: int = 3, min_samples_split: int = 2, seed: int = 42):
+    def __init__(
+        self,
+        max_depth: int = 3,
+        min_samples_split: int = 2,
+        min_samples_leaf: int = 5,
+        seed: int = 42,
+    ):
         """
         Args:
             max_depth:
@@ -25,6 +31,7 @@ class SimpleDecisionTree:
         """
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
+        self.min_samples_leaf = min_samples_leaf
         self.tree: dict | np.float16 | None = None
         self.seed: int = seed
 
@@ -63,12 +70,20 @@ class SimpleDecisionTree:
             return np.float16(np.mean(y))
 
         best_split = find_best_split(X, y, self.seed)
+        if not best_split:
+            return np.float16(np.mean(y))
         (X_left, y_left), (X_right, y_right) = split_data(
             X, y, best_split["feat"], best_split["thr"]
         )
-        left_subtree = self._grow_tree(X_left, y_left, depth + 1)
-        right_subtree = self._grow_tree(X_right, y_right, depth + 1)
-
+        # 両方の子が、ちゃんとmin_samples_leaf個以上持ってるかどうかを判定する
+        if (
+            len(y_left) >= self.min_samples_leaf
+            and len(y_right) >= self.min_samples_leaf
+        ):
+            left_subtree = self._grow_tree(X_left, y_left, depth + 1)
+            right_subtree = self._grow_tree(X_right, y_right, depth + 1)
+        else:
+            return np.float16(np.mean(y))
         # これがノード, left, rightは子のノード
         return {
             "feature_index": best_split["feat"],

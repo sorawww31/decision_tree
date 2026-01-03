@@ -1,4 +1,3 @@
-import random
 from typing import Tuple
 
 import numpy as np
@@ -37,10 +36,13 @@ def find_best_split(X, y, seed=42):
 
     feat, thrの分け方を工夫することで、XGBoost, LightGBMと進化していく。
     """
+    import random
+
     n_samples, n_feats = X.shape
 
-    best_split = {"val": float("inf"), "feat": None, "thr": None}
-    bests = []
+    best_val = float("inf")
+    bests = []  # 同率の最高スコアの分け方を格納するリスト
+
     for feat in range(n_feats):
         # np.unique() を使用
         thresholds = np.unique(X[:, feat])
@@ -55,14 +57,21 @@ def find_best_split(X, y, seed=42):
 
             val = calculate_cost(y_left, y_right)
 
-            if val <= best_split["val"]:
-                best_split["val"] = val
-                best_split["feat"] = feat
-                best_split["thr"] = thr
-                bests.append(best_split)
-    if seed is not None:
-        random.seed(seed)
-    return random.choice(bests)
+            if val < best_val:
+                # より良いスコアが見つかった場合、リストをリセット
+                best_val = val
+                bests = [{"val": val, "feat": feat, "thr": thr}]
+            elif val == best_val:
+                # 同率の場合、リストに追加
+                bests.append({"val": val, "feat": feat, "thr": thr})
+
+    # 同率の候補からランダムに1つを選択
+    if bests:
+        rng = random.Random(seed)
+        return rng.choice(bests)
+    else:
+        # 分割が見つからなかった場合（通常は起こらない）
+        return None
 
 
 def calculate_variance(y: np.ndarray) -> np.float16:

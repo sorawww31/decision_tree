@@ -5,6 +5,11 @@ from .decision_tree import SimpleDecisionTree
 
 
 class RandomForestRegressor:
+    """
+    RandomForestの凄いところ
+    1.
+    """
+
     def __init__(
         self,
         max_depth: int,
@@ -48,7 +53,7 @@ class RandomForestRegressor:
             )
             for i in range(n_estimators)
         ]
-        self.idx_feat_list: list[np.ndarray] = []
+        # self.idx_feat_list: list[np.ndarray] = []
 
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series):
         """
@@ -91,13 +96,12 @@ class RandomForestRegressor:
             # 各ツリーを各自訓練。
             # X[idx_samples, idx_feat]とすると、(is[0], if[0]), (is[1], if[1]) ...と作られていくため、数が合わなくなる
             self.trees[i].fit(X[idx_samples, :][:, idx_feat], y[idx_samples])
-            self.idx_feat_list.append(idx_feat)
+            # self.idx_feat_list.append(idx_feat)
 
     def predict(self, X: np.ndarray | pd.DataFrame):
         X = np.array(X)
         preds = [
-            self.trees[i].predict(X[:][:, self.idx_feat_list[i]])
-            for i in range(len(self.trees))
+            self.trees[i].predict(X) for i in range(len(self.trees))
         ]  # (n_estimators, n_samples)
 
         return np.mean(preds, axis=0)
