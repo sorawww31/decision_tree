@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.datasets import load_diabetes
 from sklearn.tree import DecisionTreeRegressor
 
-from decision_tree.tree import SimpleDecisionTree
+from tree.decision_tree import SimpleDecisionTree
 from utils import object
 
 
