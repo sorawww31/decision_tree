@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import numpy as np
 import pandas as pd
 
@@ -53,10 +55,11 @@ class RandomForestRegressor:
                 min_samples_split=min_samples_split,
                 seed=seed + i,
                 min_samples_leaf=min_samples_leaf,
+                max_features=max_features,
             )
             for i in range(n_estimators)
         ]
-        # self.idx_feat_list: list[np.ndarray] = []
+        self.feature_importances_: dict = defaultdict(lambda: 0)
 
     def fit(self, X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.Series):
         """
@@ -94,6 +97,8 @@ class RandomForestRegressor:
             # 各ツリーを各自訓練。
             self.trees[i].fit(X[idx_samples, :], y[idx_samples])
 
+        self.calculate_gain()
+
     def predict(self, X: np.ndarray | pd.DataFrame):
         X = np.array(X)
         preds = [
@@ -101,3 +106,11 @@ class RandomForestRegressor:
         ]  # (n_estimators, n_samples)
 
         return np.mean(preds, axis=0)
+
+    def calculate_gain(self):
+        for i in range(self.n_estimators):
+            for k, v in self.trees[i].gain.items():
+                self.feature_importances_[k] += v
+        self.feature_importances_ = dict(
+            sorted(self.feature_importances_.items(), key=lambda x: x[1], reverse=True)
+        )

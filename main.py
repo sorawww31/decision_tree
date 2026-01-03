@@ -139,6 +139,7 @@ def _get_objective_func(objective: str) -> Tuple[Callable, str]:
 
 def _evaluate_and_print(
     model_name: str,
+    model,
     objective_func: Callable,
     y_val: np.ndarray,
     y_pred: np.ndarray,
@@ -155,6 +156,7 @@ def _evaluate_and_print(
 
     print(f"[{model_name}] score: {score}")
     print(f"[{model_name}] train_score: {train_score}, means_score: {baseline}")
+    print(model.feature_importances_)
 
 
 def main():
@@ -192,6 +194,7 @@ def main():
     # 評価結果の出力
     _evaluate_and_print(
         model_name=args.mode.upper(),
+        model=model,
         objective_func=objective_func,
         y_val=y_val,
         y_pred=y_pred,
@@ -201,6 +204,7 @@ def main():
     )
     _evaluate_and_print(
         model_name="sklearn",
+        model=sklearn_model,
         objective_func=objective_func,
         y_val=y_val,
         y_pred=sklearn_pred,
