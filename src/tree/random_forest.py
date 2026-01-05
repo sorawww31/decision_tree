@@ -21,8 +21,8 @@ class RandomForestRegressor:
         min_samples_split: int,
         min_samples_leaf: int,
         n_estimators: int,
-        max_features: float,
-        max_samples: int,
+        max_features: float = 1.0,
+        max_samples: int = 1000,
         seed: int = 42,
     ):
         """

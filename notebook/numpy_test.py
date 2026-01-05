@@ -112,5 +112,17 @@ def _():
     return
 
 
+@app.cell
+def _(np):
+    y = np.array([0, 1, 2, 3])
+    x = np.array([-1, 0, 1, 2])
+    z = np.array([3,2,1,0])
+
+    k = np.array([x, y, z])
+    print(k)
+    np.sum(k, axis=0)
+    return (y,)
+
+
 if __name__ == "__main__":
     app.run()

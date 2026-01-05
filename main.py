@@ -4,10 +4,14 @@ from typing import Callable, Tuple
 import numpy as np
 import pandas as pd
 from sklearn.datasets import load_diabetes
+from sklearn.ensemble import (
+    GradientBoostingRegressor as SklearnGradientBoostingRegressor,
+)
 from sklearn.ensemble import RandomForestRegressor as SklearnRandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
 
 from src.tree.decision_tree import SimpleDecisionTree
+from src.tree.gradient_boosting import GradientBoostingRegressor
 from src.tree.random_forest import RandomForestRegressor
 from src.utils import object
 
@@ -20,11 +24,11 @@ def parsers():
         "-m",
         type=str,
         default="decision_tree",
-        choices=["decision_tree", "random_forest"],
+        choices=["decision_tree", "random_forest", "gradient_boosting"],
     )
     parser.add_argument("--max_depth", "-d", type=int, default=3)
     # 分割に必要な最小の数
-    parser.add_argument("--min_samples_split", "-s", type=int, default=2)
+    parser.add_argument("--min_samples_split", "-s", type=int, default=10)
     # 葉を構成するのに必要な最小の数
     parser.add_argument("--min_samples_leaf", "-l", type=int, default=5)
     parser.add_argument("--val_split", type=float, default=0.8)
@@ -35,7 +39,7 @@ def parsers():
         "--n_estimators",
         "-n",
         type=int,
-        default=10,
+        default=100,
         help="ランダムフォレストのツリー数",
     )
     parser.add_argument(
@@ -46,6 +50,14 @@ def parsers():
         type=int,
         default=None,
         help="ブートストラップサンプリングのサンプル数",
+    )
+    # GradientBoosting用の引数
+    parser.add_argument(
+        "--learning_rate",
+        "-lr",
+        type=float,
+        default=0.05,
+        help="勾配ブースティングの学習率",
     )
     args = parser.parse_args()
     return args
@@ -115,6 +127,25 @@ def _create_model(args):
             min_samples_leaf=args.min_samples_leaf,
             random_state=args.seed,
         )
+    elif mode == "gradient_boosting":
+        max_samples = args.max_samples
+        model = GradientBoostingRegressor(
+            max_depth=args.max_depth,
+            learning_rate=args.learning_rate,
+            min_samples_split=args.min_samples_split,
+            min_samples_leaf=args.min_samples_leaf,
+            n_estimators=args.n_estimators,
+            seed=args.seed,
+        )
+        sklearn_model = SklearnGradientBoostingRegressor(
+            max_depth=args.max_depth,
+            learning_rate=args.learning_rate,
+            min_samples_split=args.min_samples_split,
+            min_samples_leaf=args.min_samples_leaf,
+            n_estimators=args.n_estimators,
+            max_features=args.max_features,
+            random_state=args.seed,
+        )
     else:
         raise ValueError(f"{args.mode}は対応しておりません")
 
@@ -156,7 +187,10 @@ def _evaluate_and_print(
 
     print(f"[{model_name}] score: {score}")
     print(f"[{model_name}] train_score: {train_score}, means_score: {baseline}")
-    print(model.feature_importances_)
+    try:
+        print(model.feature_importances_)
+    except Exception:
+        pass
 
 
 def main():
