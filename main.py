@@ -69,7 +69,7 @@ def _load_datasets(
         df = df[:100]
 
     train_size = int(len(df) * val_split)
-    return df[:train_size], df[train_size:]
+    return df[:train_size].sample(frac=1), df[train_size:].sample(frac=1)
 
 
 def _create_model(args):
