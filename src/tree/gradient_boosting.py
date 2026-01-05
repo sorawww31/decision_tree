@@ -3,10 +3,6 @@ import numpy as np
 from .decision_tree import SimpleDecisionTree
 
 
-def mean_sqrt_error(a: ndarray, b: np.ndarray) -> np.float16:
-    return np.float16(np.mean(a - b) ** 2)
-
-
 class GradientBoostingRegressor:
     """
     勾配ブースティング決定木は、木を直列につなぎ、残差を予測するモデルの総称
@@ -41,16 +37,26 @@ class GradientBoostingRegressor:
 
     def fit(self, X: np.ndarray, y: np.ndarray):
         self.f0 = np.mean(y)
-        r = mean_sqrt_error(
-            y,
-        )
+        f = self.f0
+        r = y - self.f0
         for m in range(1, self.n_estimators + 1):
             tree = SimpleDecisionTree(
                 self.max_depth,
                 self.min_samples_split,
                 self.min_samples_leaf,
                 max_features=1.0,
-                seed=2,
+                seed=self.seed,
             )
             tree.fit(X, r)
-            f = f + self.learning_rate
+            h = tree.predict(X)
+
+            f = f + self.learning_rate * h
+
+            r = y - f
+
+            self.trees.append(tree)
+
+    def predict(self, X: np.ndarray):
+        return self.f0 + self.learning_rate * np.sum(
+            [tree.predict(X) for tree in self.trees], axis=0
+        )

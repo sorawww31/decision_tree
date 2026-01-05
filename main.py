@@ -7,9 +7,9 @@ from sklearn.datasets import load_diabetes
 from sklearn.ensemble import RandomForestRegressor as SklearnRandomForestRegressor
 from sklearn.tree import DecisionTreeRegressor
 
-from tree.decision_tree import SimpleDecisionTree
-from tree.random_forest import RandomForestRegressor
-from utils import object
+from src.tree.decision_tree import SimpleDecisionTree
+from src.tree.random_forest import RandomForestRegressor
+from src.utils import object
 
 
 def parsers():
